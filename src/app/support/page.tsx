@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Mail, Phone, MapPin, LifeBuoy } from "lucide-react";
+import { LifeBuoy } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
-import { legal, field, NOT_SET } from "@/lib/legal";
 import { Brand } from "@/components/brand";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { BackLink } from "@/components/ui/back-link";
@@ -19,12 +18,6 @@ export default async function SupportPage() {
   // Страница открыта и для неавторизованных: человек может не суметь войти
   // именно из-за проблемы, с которой обращается.
   const user = await getCurrentUser();
-
-  const contacts = [
-    { icon: Mail, label: "Почта", value: legal.supportEmail },
-    { icon: Phone, label: "Телефон", value: legal.phone },
-    { icon: MapPin, label: "Адрес", value: legal.address },
-  ].filter((c) => c.value !== NOT_SET);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -51,19 +44,6 @@ export default async function SupportPage() {
             </p>
           </div>
         </div>
-
-        {contacts.length > 0 && (
-          <div className="mt-6 grid gap-3 sm:grid-cols-3">
-            {contacts.map((c) => (
-              <div key={c.label} className="rounded-xl border border-border bg-card p-3">
-                <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <c.icon className="size-3.5" /> {c.label}
-                </p>
-                <p className="mt-1 break-words text-sm font-medium">{field(c.value)}</p>
-              </div>
-            ))}
-          </div>
-        )}
 
         <div className="mt-8 rounded-2xl border border-border bg-card p-6 shadow-sm">
           <SupportForm defaultName={user?.name ?? ""} defaultEmail={user?.email ?? ""} />
