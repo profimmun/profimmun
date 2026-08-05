@@ -1,0 +1,62 @@
+{
+  "name": "site_platforma",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "node scripts/build.mjs",
+    "start": "next start",
+    "lint": "eslint",
+    "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push",
+    "db:seed": "prisma db seed",
+    "db:studio": "prisma studio",
+    "postinstall": "prisma generate",
+    "db:deploy": "prisma migrate deploy",
+    "local:setup": "node scripts/use-sqlite.mjs && prisma db push --schema=prisma/schema.local.prisma",
+    "dev:local": "npm run local:setup && next dev",
+    "db:admin": "node scripts/create-admin.mjs",
+    "seed:content": "node scripts/seed-content.mjs"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.3",
+    "@vercel/blob": "^2.6.1",
+    "bcryptjs": "^3.0.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.26.0",
+    "next": "16.3.0",
+    "nodemailer": "^9.0.3",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "recharts": "^3.10.0",
+    "server-only": "^0.0.1",
+    "tailwind-merge": "^3.6.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^20",
+    "@types/nodemailer": "^8.0.1",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.0",
+    "prisma": "^6.19.3",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.1",
+    "typescript": "^5"
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true,
+    "sharp@0.34.5": true,
+    "unrs-resolver@1.12.2": true,
+    "@prisma/client@6.19.3": true,
+    "@prisma/engines@6.19.3": true,
+    "prisma@6.19.3": true
+  }
+}

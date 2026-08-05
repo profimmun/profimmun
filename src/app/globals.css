@@ -1,0 +1,190 @@
+@import "tailwindcss";
+
+/* Тёмная тема через класс .dark на <html> (управляется вручную + системная по умолчанию) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #f6f6fb;
+  --foreground: #14152b;
+
+  --card: #ffffff;
+  --card-foreground: #14152b;
+
+  --muted: #eeeef6;
+  --muted-foreground: #676a86;
+
+  --border: #e6e6f0;
+  --input: #e0e0ee;
+  --ring: #6d5efc;
+
+  --primary: #5b4bf5;
+  --primary-foreground: #ffffff;
+
+  --accent: #ecebff;
+  --accent-foreground: #4436d6;
+
+  --success: #16a34a;
+  --warning: #d97706;
+  --destructive: #e11d48;
+  --destructive-foreground: #ffffff;
+
+  --radius: 0.9rem;
+  --shadow-color: 232 232 245;
+}
+
+.dark {
+  --background: #08090f;
+  --foreground: #e9e9f4;
+
+  --card: #111320;
+  --card-foreground: #e9e9f4;
+
+  --muted: #191c2b;
+  --muted-foreground: #9296ad;
+
+  --border: #242739;
+  --input: #2b2f44;
+  --ring: #8b7dff;
+
+  /* Затемнён до уровня, при котором белый текст даёт 4.8:1 (WCAG AA).
+     Более светлый #7c6dff давал только 3.83:1. */
+  --primary: #6d5ce8;
+  --primary-foreground: #ffffff;
+
+  --accent: #1e1a3a;
+  --accent-foreground: #c9c2ff;
+
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --destructive: #fb7185;
+  --destructive-foreground: #08090f;
+
+  --shadow-color: 0 0 0;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 0.25rem);
+  --radius-sm: calc(var(--radius) - 0.4rem);
+
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display), var(--font-manrope), sans-serif;
+}
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  letter-spacing: -0.011em;
+}
+
+/* Дисплейный шрифт (Unbounded) — только для бренда и крупных заголовков */
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.03em;
+  font-weight: 700;
+}
+
+/* Тонкий кастомный скроллбар */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 999px;
+  border: 2px solid var(--background);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease both;
+}
+
+/* Уважаем системную настройку «уменьшить движение» */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Плавные ссылки/кнопки */
+a,
+button {
+  transition-property: color, background-color, border-color, opacity, box-shadow, transform;
+  transition-duration: 150ms;
+}
+
+/* Стилизация markdown-контента урока */
+.prose-lesson :where(h1, h2, h3) {
+  font-weight: 700;
+  line-height: 1.25;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+.prose-lesson h1 { font-size: 1.6rem; }
+.prose-lesson h2 { font-size: 1.3rem; }
+.prose-lesson h3 { font-size: 1.1rem; }
+.prose-lesson p { margin: 0.75em 0; line-height: 1.75; }
+.prose-lesson ul { list-style: disc; padding-left: 1.4em; margin: 0.75em 0; }
+.prose-lesson ol { list-style: decimal; padding-left: 1.4em; margin: 0.75em 0; }
+.prose-lesson li { margin: 0.35em 0; }
+.prose-lesson a { color: var(--primary); text-decoration: underline; }
+.prose-lesson code {
+  background: var(--muted);
+  padding: 0.15em 0.4em;
+  border-radius: 6px;
+  font-size: 0.9em;
+}
+.prose-lesson blockquote {
+  border-left: 3px solid var(--primary);
+  padding-left: 1em;
+  color: var(--muted-foreground);
+  margin: 1em 0;
+}

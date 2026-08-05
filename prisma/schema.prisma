@@ -1,0 +1,268 @@
+// Платформа онлайн-школы — схема данных
+//
+// БД: PostgreSQL. Так требует Vercel: там нет постоянной файловой системы,
+// поэтому SQLite не подходит ни для продакшена, ни для превью-деплоев.
+// Тот же DATABASE_URL используется и локально — Docker не нужен.
+//
+// Нужна ровно одна переменная — DATABASE_URL. Отдельный directUrl намеренно
+// не используется: он требовал второй переменной и ломал сборку, когда её
+// забывали задать. Если миграции через пулер начнут упираться в блокировки,
+// подставьте в DATABASE_URL прямое (non-pooling) подключение.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Строковые «перечисления» (осознанно вместо native enum: так схема остаётся
+// совместимой и с SQLite, и миграция значений не требует ALTER TYPE):
+// Role:          ADMIN | STUDENT
+// VideoType:     NONE | YOUTUBE | VIMEO | UPLOAD
+// QuestionType:  SINGLE | MULTIPLE | OPEN
+// AttemptStatus: IN_PROGRESS | SUBMITTED | GRADED
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("STUDENT")
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  /// Доказательство согласия по 152-ФЗ: что именно и когда принял пользователь.
+  /// Версии позволяют понять, какую редакцию документа он видел.
+  consentAcceptedAt      DateTime?
+  consentVersion         String?
+  termsAcceptedAt        DateTime?
+  termsVersion           String?
+  /// Отдельное необязательное согласие на рассылку (ст. 18 ФЗ «О рекламе»).
+  marketingAcceptedAt    DateTime?
+
+  sessions        Session[]
+  resetTokens     PasswordResetToken[]
+  authoredCourses Course[]             @relation("CourseAuthor")
+  enrollments     Enrollment[]
+  progress        LessonProgress[]
+  attempts        TestAttempt[]
+  groups          Group[]              @relation("GroupMembers")
+  supportTickets  SupportTicket[]
+
+  @@index([role])
+}
+
+/// Обращение в поддержку. Хранится в БД и дублируется письмом администратору,
+/// чтобы вопрос не потерялся при недоступном SMTP.
+model SupportTicket {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  /// NEW | IN_PROGRESS | CLOSED
+  status    String   @default("NEW")
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+/// Группа студентов. Даёт доступ к набору курсов.
+model Group {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String   @default("")
+  color       String   @default("indigo")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members User[]   @relation("GroupMembers")
+  courses Course[] @relation("GroupCourses")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model Course {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String   @default("")
+  coverImage  String?
+  published   Boolean  @default(false)
+  /// false (по умолчанию) — курс открыт всем студентам сразу после регистрации,
+  ///                        никакого действия администратора не требуется.
+  /// true                 — доступ только участникам групп, назначенных курсу.
+  restricted  Boolean  @default(false)
+  authorId    String
+  author      User     @relation("CourseAuthor", fields: [authorId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  modules     Module[]
+  enrollments Enrollment[]
+  /// Учитываются только когда restricted = true.
+  groups      Group[]      @relation("GroupCourses")
+
+  @@index([published])
+}
+
+model Module {
+  id        String   @id @default(cuid())
+  title     String
+  order     Int      @default(0)
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons   Lesson[]
+  createdAt DateTime @default(now())
+
+  @@index([courseId])
+}
+
+model Lesson {
+  id        String   @id @default(cuid())
+  title     String
+  slug      String
+  content   String   @default("") // markdown/текст урока
+  videoType String   @default("NONE")
+  videoUrl  String? // ссылка (YouTube/Vimeo) или путь к загруженному файлу
+  order     Int      @default(0)
+  published Boolean  @default(true)
+  moduleId  String
+  module    Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  progress LessonProgress[]
+  tests    Test[]
+
+  @@unique([moduleId, slug])
+  @@index([moduleId])
+}
+
+model Enrollment {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, courseId])
+  @@index([courseId])
+}
+
+model LessonProgress {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lessonId    String
+  lesson      Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  completed   Boolean   @default(false)
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@unique([userId, lessonId])
+  @@index([lessonId])
+}
+
+model Test {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @default("")
+  lessonId    String?
+  lesson      Lesson?  @relation(fields: [lessonId], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  questions Question[]
+  attempts  TestAttempt[]
+
+  @@index([lessonId])
+}
+
+model Question {
+  id      String         @id @default(cuid())
+  testId  String
+  test    Test           @relation(fields: [testId], references: [id], onDelete: Cascade)
+  text     String
+  type     String        @default("SINGLE")
+  points   Int           @default(1)
+  order    Int           @default(0)
+  required Boolean       @default(true)
+
+  options AnswerOption[]
+
+  @@index([testId])
+}
+
+model AnswerOption {
+  id         String   @id @default(cuid())
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  text       String
+  isCorrect  Boolean  @default(false)
+  order      Int      @default(0)
+
+  @@index([questionId])
+}
+
+model TestAttempt {
+  id          String    @id @default(cuid())
+  testId      String
+  test        Test      @relation(fields: [testId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status      String    @default("IN_PROGRESS")
+  score       Int       @default(0)
+  maxScore    Int       @default(0)
+  submittedAt DateTime?
+  gradedAt    DateTime?
+  createdAt   DateTime  @default(now())
+
+  answers AttemptAnswer[]
+
+  @@index([testId])
+  @@index([userId])
+}
+
+model AttemptAnswer {
+  id            String      @id @default(cuid())
+  attemptId     String
+  attempt       TestAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  questionId    String
+  selectedIds   String      @default("") // выбранные варианты (id через запятую)
+  openAnswer    String      @default("") // текст ответа для открытых вопросов
+  awardedPoints Int         @default(0)
+  isCorrect     Boolean?
+  graded        Boolean     @default(false)
+
+  @@index([attemptId])
+}
