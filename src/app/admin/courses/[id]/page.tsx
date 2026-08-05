@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ExternalLink } from "lucide-react";
+import { CheckCircle2, ExternalLink } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { CourseSettingsForm } from "@/components/admin/course-settings-form";
 import { ModulesManager } from "@/components/admin/modules-manager";
@@ -12,10 +12,13 @@ export const dynamic = "force-dynamic";
 
 export default async function CourseEditorPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ saved?: string }>;
 }) {
   const { id } = await params;
+  const { saved } = await searchParams;
   const course = await prisma.course.findUnique({
     where: { id },
     include: {
@@ -100,6 +103,12 @@ export default async function CourseEditorPage({
       <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
         {/* Программа курса */}
         <div className="order-2 min-w-0 lg:order-1">
+          {saved === "test" && (
+            <div className="mb-4 flex items-center gap-2 rounded-md border border-success/25 bg-success/10 p-3 text-sm font-medium text-success">
+              <CheckCircle2 className="size-4 shrink-0" />
+              Урок сохранён, тест обновлён
+            </div>
+          )}
           <h2 className="mb-4 text-lg font-semibold">Программа курса</h2>
           <ModulesManager courseId={course.id} modules={modules} />
         </div>

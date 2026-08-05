@@ -152,8 +152,7 @@ export function TestBuilder({ lessonId, courseId, initial }: Props) {
       if (res && "error" in res && (res as { error?: string }).error) {
         setMsg({ type: "err", text: (res as { error: string }).error });
       } else {
-        setMsg({ type: "ok", text: "Тест сохранён" });
-        router.refresh();
+        router.push(`/admin/courses/${courseId}?saved=test`);
       }
     });
   }
