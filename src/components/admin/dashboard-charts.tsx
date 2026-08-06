@@ -19,6 +19,10 @@ const BARS = ["#6366f1", "#8b5cf6", "#a855f7", "#d946ef", "#ec4899"];
 
 type EnrollPoint = { date: string; count: number };
 type CoursePoint = { name: string; count: number };
+type AxisTickProps = {
+  y?: number;
+  payload?: { value: string | number };
+};
 
 function niceStep(value: number) {
   const magnitude = 10 ** Math.floor(Math.log10(Math.max(1, value)));
@@ -41,6 +45,27 @@ function integerTicks(maxValue: number, targetTicks = 4) {
   return ticks;
 }
 
+function numericAxisWidth(topTick: number) {
+  return Math.max(36, String(topTick).length * 8 + 18);
+}
+
+function VisibleNumberTick({ y, payload }: AxisTickProps) {
+  if (y === undefined || !payload) return null;
+
+  return (
+    <text
+      x={4}
+      y={y}
+      fill="var(--muted-foreground)"
+      fontSize={11}
+      textAnchor="start"
+      dominantBaseline="central"
+    >
+      {payload.value}
+    </text>
+  );
+}
+
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="min-w-0 rounded-lg border border-border bg-card p-4 shadow-sm sm:p-5">
@@ -61,6 +86,7 @@ const tooltipStyle = {
 export function EnrollmentsChart({ data }: { data: EnrollPoint[] }) {
   const ticks = integerTicks(Math.max(0, ...data.map((item) => item.count)));
   const topTick = ticks[ticks.length - 1] ?? 1;
+  const yAxisWidth = numericAxisWidth(topTick);
 
   return (
     <ChartCard title="Записи на курсы за 30 дней">
@@ -78,11 +104,10 @@ export function EnrollmentsChart({ data }: { data: EnrollPoint[] }) {
             allowDecimals={false}
             domain={[0, topTick]}
             ticks={ticks}
-            tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
             tickLine={false}
             axisLine={false}
-            width={36}
-            tickMargin={8}
+            width={yAxisWidth}
+            tick={<VisibleNumberTick />}
           />
           <Tooltip contentStyle={tooltipStyle} labelStyle={{ color: "var(--muted-foreground)" }} />
           <Area type="monotone" dataKey="count" name="Записи" stroke={PRIMARY} strokeWidth={2} fill="url(#enrollFill)" />
