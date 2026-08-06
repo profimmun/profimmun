@@ -16,7 +16,7 @@ export default async function DashboardPage() {
   if (!user) redirect("/login");
 
   const [enrolled, completedLessons, gradedAttempts] = await Promise.all([
-    getEnrolledCourses(user.id),
+    getEnrolledCourses(user.id, user.role),
     prisma.lessonProgress.count({ where: { userId: user.id, completed: true } }),
     prisma.testAttempt.count({ where: { userId: user.id, status: "GRADED" } }),
   ]);

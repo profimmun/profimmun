@@ -83,6 +83,8 @@ export async function updateCourse(courseId: string, formData: FormData) {
   });
   revalidatePath(`/admin/courses/${courseId}`);
   revalidatePath("/admin/courses");
+  revalidatePath("/courses");
+  revalidatePath("/dashboard");
   return { success: "Сохранено" };
 }
 
@@ -91,6 +93,8 @@ export async function togglePublish(courseId: string, published: boolean) {
   await prisma.course.update({ where: { id: courseId }, data: { published } });
   revalidatePath("/admin/courses");
   revalidatePath(`/admin/courses/${courseId}`);
+  revalidatePath("/courses");
+  revalidatePath("/dashboard");
 }
 
 export async function deleteCourse(courseId: string) {

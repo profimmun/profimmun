@@ -65,6 +65,8 @@ export async function toggleGroupMember(
   });
   revalidatePath(`/admin/groups/${groupId}`);
   revalidatePath("/admin/students");
+  revalidatePath("/courses");
+  revalidatePath("/dashboard");
 }
 
 /** Открывает/закрывает группе доступ к курсу. */
@@ -82,6 +84,8 @@ export async function toggleGroupCourse(
   });
   revalidatePath(`/admin/groups/${groupId}`);
   revalidatePath("/admin/courses");
+  revalidatePath("/courses");
+  revalidatePath("/dashboard");
 }
 
 /** Массово задаёт группы конкретного студента (со страницы «Студенты»). */
@@ -93,4 +97,6 @@ export async function setUserGroups(userId: string, groupIds: string[]) {
   });
   revalidatePath("/admin/students");
   revalidatePath("/admin/groups");
+  revalidatePath("/courses");
+  revalidatePath("/dashboard");
 }

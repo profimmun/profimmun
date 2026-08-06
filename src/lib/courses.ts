@@ -1,5 +1,7 @@
 import "server-only";
 import { prisma } from "./prisma";
+import { accessibleCourseWhere } from "./access";
+import type { Role } from "./types";
 
 /** Курс с модулями и уроками в правильном порядке. */
 export async function getCourseBySlug(slug: string) {
@@ -57,9 +59,12 @@ export async function isEnrolled(userId: string, courseId: string) {
 }
 
 /** Курсы, на которые записан студент, с прогрессом. */
-export async function getEnrolledCourses(userId: string) {
+export async function getEnrolledCourses(userId: string, role: Role = "STUDENT") {
   const enrollments = await prisma.enrollment.findMany({
-    where: { userId },
+    where: {
+      userId,
+      course: role === "ADMIN" ? { published: true } : accessibleCourseWhere(userId),
+    },
     orderBy: { createdAt: "desc" },
     include: {
       course: {
