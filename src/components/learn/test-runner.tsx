@@ -91,9 +91,11 @@ export function TestRunner({ test }: { test: Test }) {
   const requiredQuestions = test.questions.filter((q) => q.required);
   const requiredAnswered = requiredQuestions.filter(isAnswered).length;
   const selectedOptionsCount = Object.values(answers).reduce((sum, selected) => sum + selected.length, 0);
+  const answeredOpenCount = Object.values(open).filter((value) => value.trim().length > 0).length;
+  const selectedAnswersCount = selectedOptionsCount + answeredOpenCount;
 
   function selectedLabel(count: number) {
-    return `${count} ${plural(count, ["вариант", "варианта", "вариантов"])}`;
+    return `${count} ${plural(count, ["ответ", "ответа", "ответов"])}`;
   }
 
   return (
@@ -107,7 +109,6 @@ export function TestRunner({ test }: { test: Test }) {
       <ol className="space-y-6">
         {test.questions.map((q, i) => {
           const missing = showErrors && q.required && !isAnswered(q);
-          const selectedCount = answers[q.id]?.length ?? 0;
           return (
           <li key={q.id} id={`q-${q.id}`} className="scroll-mt-24">
             <div className="mb-3 flex items-start gap-2">
@@ -120,7 +121,7 @@ export function TestRunner({ test }: { test: Test }) {
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {(q.type === "MULTIPLE"
-                    ? `Выберите несколько вариантов${selectedCount > 0 ? ` · выбрано ${selectedLabel(selectedCount)}` : ""}`
+                    ? "Выберите несколько вариантов"
                     : q.type === "SINGLE"
                     ? "Выберите один вариант"
                     : "Открытый ответ") + (q.required ? "" : " · необязательно")}
@@ -175,13 +176,8 @@ export function TestRunner({ test }: { test: Test }) {
         <span className="text-sm text-muted-foreground">
           {showErrors && requiredAnswered < requiredQuestions.length ? (
             <span className="text-destructive">Заполните обязательные вопросы (со звёздочкой)</span>
-          ) : requiredQuestions.length > 0 ? (
-            <>
-              Обязательных вопросов заполнено {requiredAnswered} из {requiredQuestions.length}
-              {selectedOptionsCount > 0 && <> · выбрано {selectedLabel(selectedOptionsCount)}</>}
-            </>
           ) : (
-            <>Все вопросы необязательны</>
+            <>Выбрано {selectedLabel(selectedAnswersCount)}</>
           )}
         </span>
         <Button onClick={submit} disabled={pending}>

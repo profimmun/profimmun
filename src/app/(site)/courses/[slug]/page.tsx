@@ -120,7 +120,7 @@ export default async function CourseDetailPage({
                         : l.videoType !== "NONE"
                           ? "text-primary"
                           : "text-muted-foreground";
-                      const titleClassName = done ? "text-muted-foreground line-through" : "";
+                      const titleClassName = done ? "text-foreground" : "";
 
                       const lessonBody = (
                         <>
