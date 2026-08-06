@@ -6,6 +6,7 @@ import {
   PlayCircle,
   FileText,
   ClipboardCheck,
+  ArrowRight,
   Users,
   CheckCircle2,
   Lock,
@@ -106,22 +107,62 @@ export default async function CourseDetailPage({
                   <ul className="divide-y divide-border">
                     {m.lessons.map((l) => {
                       const done = progress?.completedIds.has(l.id);
+                      const lessonHref = `/learn/${course.slug}/${l.slug}`;
+                      const mainHref =
+                        l.videoType !== "NONE"
+                          ? `${lessonHref}#video`
+                          : l.tests.length > 0
+                            ? `${lessonHref}#test`
+                            : `${lessonHref}#content`;
+                      const Icon = done ? CheckCircle2 : l.videoType !== "NONE" ? PlayCircle : FileText;
+                      const iconClassName = done
+                        ? "text-success"
+                        : l.videoType !== "NONE"
+                          ? "text-primary"
+                          : "text-muted-foreground";
+                      const titleClassName = done ? "text-muted-foreground line-through" : "";
+
+                      const lessonBody = (
+                        <>
+                          <Icon className={`size-4 shrink-0 ${iconClassName}`} />
+                          <span className={titleClassName}>{l.title}</span>
+                          {enrolled && <ArrowRight className="ml-auto size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />}
+                        </>
+                      );
+
                       return (
-                        <li key={l.id} className="flex items-center gap-3 p-4 text-sm">
-                          {done ? (
-                            <CheckCircle2 className="size-4 shrink-0 text-success" />
-                          ) : l.videoType !== "NONE" ? (
-                            <PlayCircle className="size-4 shrink-0 text-muted-foreground" />
+                        <li key={l.id} className="flex flex-wrap items-center gap-2 p-3 text-sm sm:flex-nowrap">
+                          {enrolled ? (
+                            <Link
+                              href={mainHref}
+                              className="group flex min-w-0 flex-1 items-center gap-3 rounded-md px-2 py-2 transition-colors hover:bg-muted hover:text-primary"
+                            >
+                              {lessonBody}
+                            </Link>
                           ) : (
-                            <FileText className="size-4 shrink-0 text-muted-foreground" />
+                            <div className="flex min-w-0 flex-1 items-center gap-3 px-2 py-2">
+                              {lessonBody}
+                            </div>
                           )}
-                          <span className={done ? "text-muted-foreground line-through" : ""}>
-                            {l.title}
-                          </span>
+                          {enrolled && l.videoType !== "NONE" && (
+                            <Link href={`${lessonHref}#video`} className="ml-9 sm:ml-0">
+                              <Badge variant="muted" className="transition-colors hover:bg-primary hover:text-primary-foreground">
+                                <PlayCircle className="size-3" /> Видео
+                              </Badge>
+                            </Link>
+                          )}
                           {l.tests.length > 0 && (
-                            <Badge variant="muted" className="ml-auto">
-                              <ClipboardCheck className="size-3" /> Тест
-                            </Badge>
+                            enrolled ? (
+                              <Link href={`${lessonHref}#test`} className="ml-9 sm:ml-0">
+                                <Badge variant="muted" className="transition-colors hover:bg-primary hover:text-primary-foreground">
+                                  <ClipboardCheck className="size-3" /> Тест
+                                </Badge>
+                              </Link>
+                            ) : (
+                              <Badge variant="muted" className="ml-9 sm:ml-0">
+                                <ClipboardCheck className="size-3" /> Тест
+                              </Badge>
+                            )
                           )}
                         </li>
                       );

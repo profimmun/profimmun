@@ -60,21 +60,22 @@ export default async function LessonPage({
       <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">{lesson.title}</h1>
 
       {lesson.videoType !== "NONE" && lesson.videoUrl && (
-        <div className="mt-6">
+        <div id="video" className="mt-6 scroll-mt-24">
           <VideoPlayer videoType={lesson.videoType as VideoType} videoUrl={lesson.videoUrl} />
         </div>
       )}
 
       {lesson.content && (
         <div
-          className="prose-lesson mt-8 text-[15px]"
+          id="content"
+          className="prose-lesson mt-8 scroll-mt-24 text-[15px]"
           dangerouslySetInnerHTML={{ __html: renderMarkdown(lesson.content) }}
         />
       )}
 
       {/* Тест урока */}
       {test && test.questions.length > 0 && (
-        <div className="mt-10">
+        <div id="test" className="mt-10 scroll-mt-24">
           {lastAttempt ? (
             <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
               <h3 className="text-lg font-semibold">{test.title}</h3>

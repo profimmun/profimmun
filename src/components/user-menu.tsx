@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { CircleUserRound, LayoutDashboard, LogOut, Shield, ChevronDown } from "lucide-react";
+import { BookOpen, CircleUserRound, LayoutDashboard, LogOut, Shield, ChevronDown } from "lucide-react";
 import { logoutAction } from "@/lib/auth-actions";
 import { cn } from "@/lib/utils";
 
@@ -65,6 +65,13 @@ export function UserMenu({ name, email, role, showName = false }: Props) {
             className="flex items-center gap-2 rounded-md px-2.5 py-2 text-sm hover:bg-muted"
           >
             <LayoutDashboard className="size-4" /> Мой кабинет
+          </Link>
+          <Link
+            href="/courses"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2 rounded-md px-2.5 py-2 text-sm hover:bg-muted"
+          >
+            <BookOpen className="size-4" /> Курсы
           </Link>
           {role === "ADMIN" && (
             <Link

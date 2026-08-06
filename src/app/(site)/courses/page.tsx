@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { getCourseProgress } from "@/lib/courses";
 import { accessibleCourseWhere } from "@/lib/access";
 import { CourseCard } from "@/components/course-card";
+import { BackLink } from "@/components/ui/back-link";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Курсы" };
@@ -51,7 +52,8 @@ export default async function CoursesPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Каталог курсов</h1>
+        <BackLink href="/dashboard">Мой кабинет</BackLink>
+        <h1 className="mt-3 text-3xl font-bold tracking-tight">Каталог курсов</h1>
         <p className="mt-2 text-muted-foreground">
           Выберите курс и начните учиться в удобном темпе
         </p>
