@@ -89,7 +89,7 @@ export function LessonEditForm({ lesson }: Props) {
               key={opt.v}
               type="button"
               onClick={() => setVideoType(opt.v)}
-              className={`flex flex-col items-center gap-1 rounded-md border p-2.5 text-xs transition-colors ${
+              className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-md border p-2.5 text-center text-xs transition-colors ${
                 videoType === opt.v
                   ? "border-primary bg-accent text-accent-foreground"
                   : "border-border hover:bg-muted"
@@ -130,7 +130,7 @@ export function LessonEditForm({ lesson }: Props) {
       </div>
 
       <div>
-        <Label htmlFor="content">Содержание урока (Markdown)</Label>
+        <Label htmlFor="content">Содержание урока</Label>
         <Textarea
           id="content"
           name="content"
