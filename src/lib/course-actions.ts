@@ -1,11 +1,9 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "./prisma";
 import { requireUser } from "./auth";
 import { canAccessCourse } from "./access";
-import { markLessonCompleted } from "./progress";
 
 /** Запись студента на курс с последующим переходом к обучению. */
 export async function enrollAction(formData: FormData) {
@@ -27,35 +25,3 @@ export async function enrollAction(formData: FormData) {
   redirect(`/learn/${slug}`);
 }
 
-/** Отмечает урок пройденным/непройденным. */
-export async function setLessonComplete(lessonId: string, completed: boolean) {
-  const user = await requireUser();
-
-  // Отмечать можно только уроки доступного курса.
-  const lesson = await prisma.lesson.findUnique({
-    where: { id: lessonId },
-    select: { module: { select: { courseId: true } } },
-  });
-  if (!lesson) throw new Error("LESSON_NOT_FOUND");
-  if (!(await canAccessCourse(user, lesson.module.courseId))) {
-    throw new Error("FORBIDDEN");
-  }
-
-  if (completed) {
-    await markLessonCompleted(user.id, lessonId);
-  } else {
-    await prisma.lessonProgress.upsert({
-      where: { userId_lessonId: { userId: user.id, lessonId } },
-      update: { completed: false, completedAt: null },
-      create: {
-        userId: user.id,
-        lessonId,
-        completed: false,
-        completedAt: null,
-      },
-    });
-  }
-
-  revalidatePath("/learn", "layout");
-  revalidatePath("/dashboard");
-}

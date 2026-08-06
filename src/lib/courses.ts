@@ -32,15 +32,27 @@ export async function getCourseProgress(userId: string, courseId: string) {
   const total = lessons.length;
   if (total === 0) return { completed: 0, total: 0, percent: 0, completedIds: new Set<string>() };
 
+  const lessonIds = lessons.map((l) => l.id);
   const done = await prisma.lessonProgress.findMany({
     where: {
       userId,
       completed: true,
-      lessonId: { in: lessons.map((l) => l.id) },
+      lessonId: { in: lessonIds },
     },
     select: { lessonId: true },
   });
   const completedIds = new Set(done.map((d) => d.lessonId));
+  const attemptedLessons = await prisma.testAttempt.findMany({
+    where: {
+      userId,
+      test: { lessonId: { in: lessonIds } },
+    },
+    select: { test: { select: { lessonId: true } } },
+  });
+  for (const attempt of attemptedLessons) {
+    if (attempt.test.lessonId) completedIds.add(attempt.test.lessonId);
+  }
+
   const completed = completedIds.size;
   return {
     completed,
