@@ -54,6 +54,12 @@ function integerTicks(maxValue: number, targetTicks = 4) {
   return ticks;
 }
 
+function integerTicksWithHeadroom(maxValue: number, targetTicks = 4) {
+  const max = Math.max(0, Math.ceil(maxValue));
+  const headroom = Math.max(1, Math.ceil(max * 0.2));
+  return integerTicks(max + headroom, targetTicks);
+}
+
 function numericAxisWidth(topTick: number) {
   return Math.max(36, String(topTick).length * 8 + 18);
 }
@@ -143,7 +149,7 @@ function ChartCard({ title, children }: { title: string; children: React.ReactNo
   return (
     <div className="min-w-0 rounded-lg border border-border bg-card p-4 shadow-sm sm:p-5">
       <h3 className="mb-4 font-semibold">{title}</h3>
-      <div className="h-64 overflow-x-auto">{children}</div>
+      <div className="h-64 overflow-x-auto overflow-y-hidden [scrollbar-gutter:stable]">{children}</div>
     </div>
   );
 }
@@ -157,7 +163,7 @@ const tooltipStyle = {
 };
 
 export function EnrollmentsChart({ data }: { data: EnrollPoint[] }) {
-  const ticks = integerTicks(Math.max(0, ...data.map((item) => item.count)));
+  const ticks = integerTicksWithHeadroom(Math.max(0, ...data.map((item) => item.count)));
   const topTick = ticks[ticks.length - 1] ?? 1;
   const yAxisWidth = numericAxisWidth(topTick);
 
@@ -182,7 +188,11 @@ export function EnrollmentsChart({ data }: { data: EnrollPoint[] }) {
             width={yAxisWidth}
             tick={<VisibleNumberTick />}
           />
-          <Tooltip contentStyle={tooltipStyle} labelStyle={{ color: "var(--muted-foreground)" }} />
+          <Tooltip
+            contentStyle={tooltipStyle}
+            labelStyle={{ color: "var(--muted-foreground)" }}
+            wrapperStyle={{ outline: "none", pointerEvents: "none" }}
+          />
           <Area type="monotone" dataKey="count" name="Записи" stroke={PRIMARY} strokeWidth={2} fill="url(#enrollFill)" />
         </AreaChart>
       </ResponsiveContainer>
@@ -191,7 +201,7 @@ export function EnrollmentsChart({ data }: { data: EnrollPoint[] }) {
 }
 
 export function TopCoursesChart({ data }: { data: CoursePoint[] }) {
-  const ticks = integerTicks(Math.max(0, ...data.map((item) => item.count)));
+  const ticks = integerTicksWithHeadroom(Math.max(0, ...data.map((item) => item.count)));
   const topTick = ticks[ticks.length - 1] ?? 1;
 
   if (data.length === 0) {
@@ -228,7 +238,11 @@ export function TopCoursesChart({ data }: { data: CoursePoint[] }) {
               tickMargin={6}
               interval={0}
             />
-            <Tooltip content={<TopCoursesTooltip />} cursor={{ fill: "var(--muted)" }} />
+            <Tooltip
+              content={<TopCoursesTooltip />}
+              cursor={{ fill: "var(--muted)" }}
+              wrapperStyle={{ outline: "none", pointerEvents: "none" }}
+            />
             <Bar dataKey="count" name="Записи" radius={[0, 6, 6, 0]} barSize={22}>
               <LabelList dataKey="count" position="right" fill="var(--muted-foreground)" fontSize={12} />
               {data.map((_, i) => (
