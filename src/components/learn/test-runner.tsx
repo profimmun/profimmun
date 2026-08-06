@@ -98,6 +98,10 @@ export function TestRunner({ test }: { test: Test }) {
     return `${count} ${plural(count, ["ответ", "ответа", "ответов"])}`;
   }
 
+  function selectedSummary(count: number) {
+    return `${count === 1 ? "Выбран" : "Выбрано"} ${selectedLabel(count)}`;
+  }
+
   return (
     <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
       <div className="mb-5 flex items-center gap-2">
@@ -177,7 +181,7 @@ export function TestRunner({ test }: { test: Test }) {
           {showErrors && requiredAnswered < requiredQuestions.length ? (
             <span className="text-destructive">Заполните обязательные вопросы (со звёздочкой)</span>
           ) : (
-            <>Выбрано {selectedLabel(selectedAnswersCount)}</>
+            <>{selectedSummary(selectedAnswersCount)}</>
           )}
         </span>
         <Button onClick={submit} disabled={pending}>
