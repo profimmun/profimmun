@@ -63,6 +63,9 @@ export default async function LessonPage({
   if (autoCompletedNow) {
     await markLessonCompleted(user.id, lesson.id);
   }
+  if (lastAttempt && !nextHref) {
+    redirect(`/courses/${courseSlug}`);
+  }
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-8">
@@ -108,6 +111,7 @@ export default async function LessonPage({
             </div>
           ) : (
             <TestRunner
+              completionHref={!nextHref ? `/courses/${courseSlug}` : undefined}
               test={{
                 id: test.id,
                 title: test.title,

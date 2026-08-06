@@ -19,7 +19,13 @@ type Question = {
 };
 type Test = { id: string; title: string; description: string; questions: Question[] };
 
-export function TestRunner({ test }: { test: Test }) {
+export function TestRunner({
+  test,
+  completionHref,
+}: {
+  test: Test;
+  completionHref?: string;
+}) {
   const router = useRouter();
   const [answers, setAnswers] = React.useState<Record<string, string[]>>({});
   const [open, setOpen] = React.useState<Record<string, string>>({});
@@ -62,6 +68,10 @@ export function TestRunner({ test }: { test: Test }) {
     }));
     start(async () => {
       const r = await submitTest(test.id, payload);
+      if (completionHref) {
+        router.push(completionHref);
+        return;
+      }
       setResult(r);
       router.refresh();
     });
