@@ -75,7 +75,7 @@ export default async function AdminDashboard() {
   const topSeries = topCourses
     .filter((c) => c._count.enrollments > 0)
     .map((c) => ({
-      name: c.title.length > 22 ? c.title.slice(0, 22) + "…" : c.title,
+      name: c.title,
       count: c._count.enrollments,
     }));
 

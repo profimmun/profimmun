@@ -23,6 +23,15 @@ type AxisTickProps = {
   y?: number;
   payload?: { value: string | number };
 };
+type CourseNameTickProps = {
+  x?: number;
+  y?: number;
+  payload?: { value: string | number };
+};
+type TopCoursesTooltipProps = {
+  active?: boolean;
+  payload?: Array<{ value?: string | number; payload?: CoursePoint }>;
+};
 
 function niceStep(value: number) {
   const magnitude = 10 ** Math.floor(Math.log10(Math.max(1, value)));
@@ -63,6 +72,70 @@ function VisibleNumberTick({ y, payload }: AxisTickProps) {
     >
       {payload.value}
     </text>
+  );
+}
+
+function splitCourseName(value: string) {
+  const limit = 18;
+  const words = value.trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return [value];
+
+  const lines: string[] = [];
+  let current = "";
+
+  for (const word of words) {
+    const next = current ? `${current} ${word}` : word;
+    if (next.length <= limit) {
+      current = next;
+      continue;
+    }
+
+    if (current) lines.push(current);
+    current = word;
+
+    if (lines.length === 2) break;
+  }
+
+  if (current && lines.length < 2) lines.push(current);
+
+  const joined = lines.join(" ");
+  if (joined.length < value.length && lines.length > 0) {
+    lines[lines.length - 1] = `${lines[lines.length - 1].slice(0, Math.max(1, limit - 1))}…`;
+  }
+
+  return lines.slice(0, 2);
+}
+
+function CourseNameTick({ x = 0, y = 0, payload }: CourseNameTickProps) {
+  if (!payload) return null;
+
+  const fullName = String(payload.value);
+  const lines = splitCourseName(fullName);
+  const offset = lines.length > 1 ? -7 : 0;
+
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <title>{fullName}</title>
+      <text fill="var(--muted-foreground)" fontSize={11} textAnchor="end" dominantBaseline="central">
+        {lines.map((line, index) => (
+          <tspan key={`${line}-${index}`} x={0} dy={index === 0 ? offset : 13}>
+            {line}
+          </tspan>
+        ))}
+      </text>
+    </g>
+  );
+}
+
+function TopCoursesTooltip({ active, payload }: TopCoursesTooltipProps) {
+  const item = payload?.[0]?.payload;
+  if (!active || !item) return null;
+
+  return (
+    <div className="max-w-72 rounded-lg border border-border bg-card px-3 py-2 text-sm shadow-sm">
+      <p className="font-medium text-foreground">{item.name}</p>
+      <p className="mt-1 text-muted-foreground">Записи: {item.count}</p>
+    </div>
   );
 }
 
@@ -148,13 +221,14 @@ export function TopCoursesChart({ data }: { data: CoursePoint[] }) {
             <YAxis
               type="category"
               dataKey="name"
-              width={82}
-              tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+              width={112}
+              tick={<CourseNameTick />}
               tickLine={false}
               axisLine={false}
               tickMargin={6}
+              interval={0}
             />
-            <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "var(--muted)" }} />
+            <Tooltip content={<TopCoursesTooltip />} cursor={{ fill: "var(--muted)" }} />
             <Bar dataKey="count" name="Записи" radius={[0, 6, 6, 0]} barSize={22}>
               <LabelList dataKey="count" position="right" fill="var(--muted-foreground)" fontSize={12} />
               {data.map((_, i) => (
