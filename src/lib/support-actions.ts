@@ -55,7 +55,14 @@ export async function submitSupportTicket(
   const to = supportRecipient();
   if (to) {
     try {
-      const mail = supportTicketEmail({ id: ticket.id, name, email, subject, message });
+      const mail = supportTicketEmail({
+        id: ticket.id,
+        name,
+        email,
+        subject,
+        message,
+        createdAt: ticket.createdAt,
+      });
       await sendMail({ to, ...mail, replyTo: email });
     } catch (e) {
       // Письмо не ушло — обращение уже сохранено, поэтому пользователю

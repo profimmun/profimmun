@@ -2,7 +2,7 @@ import { LifeBuoy, Mail, Inbox } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { TicketStatus } from "@/components/admin/ticket-status";
 import { Badge } from "@/components/ui/badge";
-import { formatDateTime, plural } from "@/lib/utils";
+import { formatMoscowDateTime, plural } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -58,7 +58,7 @@ export default async function SupportTicketsPage() {
                     </a>
                     {t.user && " · зарегистрирован"}
                     {" · "}
-                    {formatDateTime(t.createdAt)}
+                    {formatMoscowDateTime(t.createdAt)}
                   </p>
                 </div>
                 <TicketStatus ticketId={t.id} status={t.status} />

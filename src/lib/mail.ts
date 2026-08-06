@@ -1,5 +1,6 @@
 import "server-only";
 import nodemailer from "nodemailer";
+import { formatMoscowDateTime } from "./utils";
 
 type MailInput = {
   to: string;
@@ -82,14 +83,18 @@ export function supportTicketEmail(t: {
   email: string;
   subject: string;
   message: string;
+  createdAt: Date | string;
 }) {
+  const sentAt = formatMoscowDateTime(t.createdAt);
+
   return {
     subject: `Поддержка: ${t.subject}`,
-    text: `Обращение №${t.id}\nОт: ${t.name} <${t.email}>\nТема: ${t.subject}\n\n${t.message}`,
+    text: `Обращение №${t.id}\nОтправлено: ${sentAt}\nОт: ${t.name} <${t.email}>\nТема: ${t.subject}\n\n${t.message}`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px">
         <h2 style="color:#4f46e5;margin:0 0 4px">Новое обращение в поддержку</h2>
         <p style="color:#666;font-size:13px;margin:0 0 20px">Обращение №${escapeHtml(t.id)}</p>
+        <p><strong>Отправлено:</strong> ${escapeHtml(sentAt)}</p>
         <p><strong>От:</strong> ${escapeHtml(t.name)} &lt;${escapeHtml(t.email)}&gt;</p>
         <p><strong>Тема:</strong> ${escapeHtml(t.subject)}</p>
         <div style="margin-top:16px;padding:14px;background:#f5f5fa;border-radius:10px;white-space:pre-line">${escapeHtml(t.message)}</div>
