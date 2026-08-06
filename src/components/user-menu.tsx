@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { LayoutDashboard, LogOut, Shield, ChevronDown } from "lucide-react";
+import { CircleUserRound, LayoutDashboard, LogOut, Shield, ChevronDown } from "lucide-react";
 import { logoutAction } from "@/lib/auth-actions";
 import { cn } from "@/lib/utils";
 
@@ -10,9 +10,10 @@ type Props = {
   name: string;
   email: string;
   role: "ADMIN" | "STUDENT";
+  showName?: boolean;
 };
 
-export function UserMenu({ name, email, role }: Props) {
+export function UserMenu({ name, email, role, showName = false }: Props) {
   const [open, setOpen] = React.useState(false);
   const ref = React.useRef<HTMLDivElement>(null);
 
@@ -35,11 +36,19 @@ export function UserMenu({ name, email, role }: Props) {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 rounded-full py-1 pl-1 pr-2 hover:bg-muted"
+        className="flex min-w-0 items-center gap-2 rounded-full py-1 pl-1 pr-2 hover:bg-muted"
       >
         <span className="grid size-8 place-items-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
-          {initials}
+          {showName ? <CircleUserRound className="size-4" /> : initials}
         </span>
+        {showName && (
+          <span className="hidden min-w-0 max-w-36 text-left sm:block xl:max-w-44">
+            <span className="block truncate text-sm font-medium leading-4">{name}</span>
+            <span className="block truncate text-[11px] leading-3 text-muted-foreground">
+              {role === "ADMIN" ? "Администратор" : "Студент"}
+            </span>
+          </span>
+        )}
         <ChevronDown className={cn("size-4 text-muted-foreground transition-transform", open && "rotate-180")} />
       </button>
 

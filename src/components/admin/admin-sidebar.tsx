@@ -52,8 +52,8 @@ export function AdminSidebar({ actions }: { actions?: React.ReactNode }) {
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-[min(18rem,calc(100vw-2rem))] flex-col border-r border-border bg-card transition-transform lg:sticky lg:top-0 lg:h-screen lg:w-64 lg:translate-x-0",
-          open ? "translate-x-0" : "-translate-x-full"
+          "fixed inset-y-0 right-0 z-50 flex w-[min(18rem,calc(100vw-2rem))] flex-col border-l border-border bg-card transition-transform lg:sticky lg:top-0 lg:h-screen lg:w-64 lg:translate-x-0 lg:border-l-0 lg:border-r",
+          open ? "translate-x-0" : "translate-x-full"
         )}
       >
         <div className="flex items-center justify-between border-b border-border p-4">

@@ -21,14 +21,14 @@ export default async function AdminLayout({
         actions={
           <>
             <ThemeToggle />
-            <UserMenu name={user.name} email={user.email} role={user.role} />
+            <UserMenu name={user.name} email={user.email} role={user.role} showName />
           </>
         }
       />
       <div className="flex min-h-screen min-w-0 flex-col">
         <header className="sticky top-0 z-30 hidden h-16 items-center justify-end gap-2 border-b border-border bg-background/80 px-6 backdrop-blur-md lg:flex">
           <ThemeToggle />
-          <UserMenu name={user.name} email={user.email} role={user.role} />
+          <UserMenu name={user.name} email={user.email} role={user.role} showName />
         </header>
         <main className="min-w-0 flex-1 px-3 py-4 sm:px-5 sm:py-6 lg:p-8">{children}</main>
       </div>

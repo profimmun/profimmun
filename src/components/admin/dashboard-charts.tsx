@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -27,10 +28,17 @@ type CourseNameTickProps = {
   x?: number;
   y?: number;
   payload?: { value: string | number };
+  onHover?: (name: string, position: { x: number; y: number }) => void;
+  onLeave?: () => void;
 };
 type TopCoursesTooltipProps = {
   active?: boolean;
   payload?: Array<{ value?: string | number; payload?: CoursePoint }>;
+};
+type HoveredCourseLabel = {
+  item: CoursePoint;
+  x: number;
+  y: number;
 };
 
 function niceStep(value: number) {
@@ -112,7 +120,7 @@ function splitCourseName(value: string) {
   return lines.slice(0, 2);
 }
 
-function CourseNameTick({ x = 0, y = 0, payload }: CourseNameTickProps) {
+function CourseNameTick({ x = 0, y = 0, payload, onHover, onLeave }: CourseNameTickProps) {
   if (!payload) return null;
 
   const fullName = String(payload.value);
@@ -120,8 +128,21 @@ function CourseNameTick({ x = 0, y = 0, payload }: CourseNameTickProps) {
   const offset = lines.length > 1 ? -7 : 0;
 
   return (
-    <g transform={`translate(${x},${y})`}>
+    <g
+      className="cursor-help"
+      transform={`translate(${x},${y})`}
+      onMouseEnter={() => onHover?.(fullName, { x, y })}
+      onMouseLeave={onLeave}
+    >
       <title>{fullName}</title>
+      <rect
+        x={-112}
+        y={lines.length > 1 ? -19 : -11}
+        width={112}
+        height={lines.length > 1 ? 38 : 22}
+        fill="transparent"
+        pointerEvents="all"
+      />
       <text fill="var(--muted-foreground)" fontSize={11} textAnchor="end" dominantBaseline="central">
         {lines.map((line, index) => (
           <tspan key={`${line}-${index}`} x={0} dy={index === 0 ? offset : 13}>
@@ -137,6 +158,10 @@ function TopCoursesTooltip({ active, payload }: TopCoursesTooltipProps) {
   const item = payload?.[0]?.payload;
   if (!active || !item) return null;
 
+  return <CourseTooltip item={item} />;
+}
+
+function CourseTooltip({ item }: { item: CoursePoint }) {
   return (
     <div className="max-w-72 rounded-lg border border-border bg-card px-3 py-2 text-sm shadow-sm">
       <p className="font-medium text-foreground">{item.name}</p>
@@ -203,6 +228,13 @@ export function EnrollmentsChart({ data }: { data: EnrollPoint[] }) {
 export function TopCoursesChart({ data }: { data: CoursePoint[] }) {
   const ticks = integerTicksWithHeadroom(Math.max(0, ...data.map((item) => item.count)));
   const topTick = ticks[ticks.length - 1] ?? 1;
+  const [hoveredLabel, setHoveredLabel] = useState<HoveredCourseLabel | null>(null);
+
+  const handleLabelHover = (name: string, position: { x: number; y: number }) => {
+    const item = data.find((course) => course.name === name);
+    if (!item) return;
+    setHoveredLabel({ item, ...position });
+  };
 
   if (data.length === 0) {
     return (
@@ -215,7 +247,19 @@ export function TopCoursesChart({ data }: { data: CoursePoint[] }) {
   }
   return (
     <ChartCard title="Топ курсов по записям">
-      <div className="h-full min-w-[320px]">
+      <div className="relative h-full min-w-[320px]" onMouseLeave={() => setHoveredLabel(null)}>
+        {hoveredLabel ? (
+          <div
+            className="pointer-events-none absolute z-10"
+            style={{
+              left: hoveredLabel.x + 12,
+              top: hoveredLabel.y,
+              transform: "translateY(-50%)",
+            }}
+          >
+            <CourseTooltip item={hoveredLabel.item} />
+          </div>
+        ) : null}
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} layout="vertical" margin={{ top: 5, right: 34, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
@@ -232,15 +276,16 @@ export function TopCoursesChart({ data }: { data: CoursePoint[] }) {
               type="category"
               dataKey="name"
               width={112}
-              tick={<CourseNameTick />}
+              tick={<CourseNameTick onHover={handleLabelHover} onLeave={() => setHoveredLabel(null)} />}
               tickLine={false}
               axisLine={false}
               tickMargin={6}
               interval={0}
             />
             <Tooltip
+              shared={false}
               content={<TopCoursesTooltip />}
-              cursor={{ fill: "var(--muted)" }}
+              cursor={false}
               wrapperStyle={{ outline: "none", pointerEvents: "none" }}
             />
             <Bar dataKey="count" name="Записи" radius={[0, 6, 6, 0]} barSize={22}>
