@@ -1,11 +1,15 @@
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { ArrowRight } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { getCourseBySlug } from "@/lib/courses";
 import { prisma } from "@/lib/prisma";
 import { renderMarkdown } from "@/lib/markdown";
+import { markLessonCompleted } from "@/lib/progress";
 import { VideoPlayer } from "@/components/learn/video-player";
-import { LessonComplete } from "@/components/learn/lesson-complete";
 import { TestRunner } from "@/components/learn/test-runner";
+import { ProgressRefresh } from "@/components/learn/progress-refresh";
+import { buttonVariants } from "@/components/ui/button";
 import { formatDateTime } from "@/lib/utils";
 import type { QuestionType, VideoType } from "@/lib/types";
 
@@ -53,9 +57,16 @@ export default async function LessonPage({
   ]);
 
   const lastAttempt = attempts[0] ?? null;
+  const hasRequiredTest = Boolean(test && test.questions.length > 0);
+  const shouldAutoComplete = !hasRequiredTest || Boolean(lastAttempt);
+  const autoCompletedNow = shouldAutoComplete && !progress?.completed;
+  if (autoCompletedNow) {
+    await markLessonCompleted(user.id, lesson.id);
+  }
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-8">
+      {autoCompletedNow && <ProgressRefresh />}
       <p className="text-sm text-muted-foreground">Урок {index + 1} из {flat.length}</p>
       <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">{lesson.title}</h1>
 
@@ -115,13 +126,13 @@ export default async function LessonPage({
         </div>
       )}
 
-      <div className="mt-10 border-t border-border pt-6">
-        <LessonComplete
-          lessonId={lesson.id}
-          completed={progress?.completed ?? false}
-          nextHref={nextHref}
-        />
-      </div>
+      {nextHref && (
+        <div className="mt-10 border-t border-border pt-6">
+          <Link href={nextHref} className={buttonVariants()}>
+            Следующий урок <ArrowRight className="size-4" />
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

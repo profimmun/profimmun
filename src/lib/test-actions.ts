@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "./prisma";
 import { requireUser } from "./auth";
 import { canAccessCourse } from "./access";
+import { markLessonCompleted } from "./progress";
 
 export type AnswerPayload = {
   questionId: string;
@@ -36,7 +37,7 @@ export async function submitTest(
     where: { id: testId },
     include: {
       questions: { include: { options: true } },
-      lesson: { select: { module: { select: { courseId: true } } } },
+      lesson: { select: { id: true, module: { select: { courseId: true } } } },
     },
   });
   if (!test) throw new Error("TEST_NOT_FOUND");
@@ -44,8 +45,9 @@ export async function submitTest(
   // Тест принадлежит курсу — значит должен подчиняться тем же правилам доступа,
   // что и сам курс. Иначе тест закрытого курса можно было бы пройти по прямому
   // вызову экшена, минуя ограничение по группам.
+  const lessonId = test.lesson?.id;
   const courseId = test.lesson?.module.courseId;
-  if (!courseId) throw new Error("TEST_NOT_LINKED");
+  if (!lessonId || !courseId) throw new Error("TEST_NOT_LINKED");
   if (!(await canAccessCourse(user, courseId))) throw new Error("FORBIDDEN");
 
   const answerMap = new Map(answers.map((a) => [a.questionId, a]));
@@ -116,6 +118,10 @@ export async function submitTest(
     },
   });
 
+  await markLessonCompleted(user.id, lessonId);
+
+  revalidatePath("/learn", "layout");
+  revalidatePath("/courses");
   revalidatePath("/dashboard");
 
   return {

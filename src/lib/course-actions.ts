@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "./prisma";
 import { requireUser } from "./auth";
 import { canAccessCourse } from "./access";
+import { markLessonCompleted } from "./progress";
 
 /** Запись студента на курс с последующим переходом к обучению. */
 export async function enrollAction(formData: FormData) {
@@ -40,16 +41,20 @@ export async function setLessonComplete(lessonId: string, completed: boolean) {
     throw new Error("FORBIDDEN");
   }
 
-  await prisma.lessonProgress.upsert({
-    where: { userId_lessonId: { userId: user.id, lessonId } },
-    update: { completed, completedAt: completed ? new Date() : null },
-    create: {
-      userId: user.id,
-      lessonId,
-      completed,
-      completedAt: completed ? new Date() : null,
-    },
-  });
+  if (completed) {
+    await markLessonCompleted(user.id, lessonId);
+  } else {
+    await prisma.lessonProgress.upsert({
+      where: { userId_lessonId: { userId: user.id, lessonId } },
+      update: { completed: false, completedAt: null },
+      create: {
+        userId: user.id,
+        lessonId,
+        completed: false,
+        completedAt: null,
+      },
+    });
+  }
 
   revalidatePath("/learn", "layout");
   revalidatePath("/dashboard");
