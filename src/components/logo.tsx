@@ -14,9 +14,9 @@ export function LogoMark({ className }: { className?: string }) {
       aria-label="Платформа"
       className={cn("size-8", className)}
     >
-      <rect opacity="0.8" x="7.76758" y="25.222" width="33.4798" height="22.778" rx="11.389" fill="#0CC27C" />
+      <rect opacity="0.8" x="7.76758" y="25.2227" width="33.4798" height="22.778" rx="11.389" fill="#0CC27C" />
       <rect opacity="0.8" x="48" width="38.224" height="21.5492" rx="10.7746" transform="rotate(90 48 0)" fill="#FED8AE" />
-      <rect opacity="0.8" y="7.72302" width="36.1619" height="22.778" rx="11.389" fill="#B4A8FE" />
+      <rect opacity="0.8" y="7.72266" width="36.1619" height="22.778" rx="11.389" fill="#B4A8FE" />
     </svg>
   );
 }

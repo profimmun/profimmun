@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Logo } from "./logo";
+import { Logo, LogoMark } from "./logo";
 import { cn } from "@/lib/utils";
 
 export function Brand({
@@ -18,7 +18,8 @@ export function Brand({
         className
       )}
     >
-      <Logo className="h-7 w-auto" />
+      <LogoMark className="size-8 sm:hidden" />
+      <Logo className="hidden h-7 w-auto sm:block" />
     </Link>
   );
 }

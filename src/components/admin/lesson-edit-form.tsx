@@ -78,7 +78,7 @@ export function LessonEditForm({ lesson }: Props) {
       {/* Видео */}
       <div className="rounded-lg border border-border p-4">
         <Label>Видео урока</Label>
-        <div className="mb-3 grid grid-cols-4 gap-2">
+        <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {([
             { v: "NONE", label: "Нет", icon: null },
             { v: "YOUTUBE", label: "YouTube", icon: PlayCircle },
@@ -154,8 +154,8 @@ export function LessonEditForm({ lesson }: Props) {
         </div>
       </label>
 
-      <div className="flex items-center justify-between border-t border-border pt-5">
-        <Button type="button" variant="ghost" onClick={onDelete} className="text-destructive hover:bg-destructive/10">
+      <div className="flex flex-col-reverse gap-2 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
+        <Button type="button" variant="ghost" onClick={onDelete} className="justify-center text-destructive hover:bg-destructive/10 sm:justify-start">
           <Trash2 className="size-4" /> Удалить урок
         </Button>
         <Button type="submit" disabled={pending}>

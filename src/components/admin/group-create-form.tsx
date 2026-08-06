@@ -23,8 +23,8 @@ export function GroupCreateForm() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4">
-      <div className="w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-xl animate-fade-in-up">
+    <div className="fixed inset-0 z-50 grid place-items-end bg-black/40 p-0 sm:place-items-center sm:p-4">
+      <div className="max-h-[calc(100vh-1rem)] w-full overflow-y-auto rounded-t-2xl border border-border bg-card p-5 shadow-xl animate-fade-in-up sm:max-w-lg sm:rounded-2xl sm:p-6">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold">Создать группу</h2>
           <button
@@ -49,7 +49,7 @@ export function GroupCreateForm() {
             <Label htmlFor="description">Описание</Label>
             <Textarea id="description" name="description" placeholder="Кто входит в группу и зачем" />
           </div>
-          <div className="flex justify-end gap-2">
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
               Отмена
             </Button>

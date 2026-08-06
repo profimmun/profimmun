@@ -120,9 +120,9 @@ export default async function AdminDashboard() {
       {pendingReviews > 0 && (
         <Link
           href="/admin/reviews"
-          className="group flex items-center justify-between gap-3 rounded-2xl border border-warning/40 bg-warning/10 p-4 transition-colors hover:bg-warning/15"
+          className="group flex flex-col gap-3 rounded-2xl border border-warning/40 bg-warning/10 p-4 transition-colors hover:bg-warning/15 sm:flex-row sm:items-center sm:justify-between"
         >
-          <div className="flex items-center gap-3">
+          <div className="flex min-w-0 items-start gap-3 sm:items-center">
             <ClipboardCheck className="size-5 text-warning" />
             <span className="text-sm font-medium">
               {pendingReviews} тест(ов) ожидают проверки открытых ответов
@@ -154,8 +154,8 @@ export default async function AdminDashboard() {
         ) : (
           <ul className="divide-y divide-border">
             {recentEnrollments.map((e, i) => (
-              <li key={i} className="flex items-center justify-between p-4 px-5 text-sm">
-                <div>
+              <li key={i} className="flex flex-col gap-2 p-4 px-5 text-sm sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
                   <span className="font-medium">{e.user.name}</span>
                   <span className="text-muted-foreground"> записался на </span>
                   <span className="font-medium">{e.course.title}</span>

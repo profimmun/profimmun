@@ -26,30 +26,33 @@ const nav = [
   { href: "/admin/support", label: "Поддержка", icon: LifeBuoy },
 ];
 
-export function AdminSidebar() {
+export function AdminSidebar({ actions }: { actions?: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = React.useState(false);
 
   return (
     <>
       {/* Мобильный топбар */}
-      <div className="flex items-center justify-between border-b border-border bg-card p-3 lg:hidden">
+      <div className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-border bg-card/95 px-3 backdrop-blur-md lg:hidden">
         <Brand href="/admin" />
-        <button
-          onClick={() => setOpen(true)}
-          aria-label="Открыть меню"
-          aria-expanded={open}
-          className="rounded-md p-2 hover:bg-muted"
-        >
-          <Menu className="size-5" />
-        </button>
+        <div className="flex min-w-0 shrink-0 items-center gap-1.5">
+          {actions}
+          <button
+            onClick={() => setOpen(true)}
+            aria-label="Открыть меню"
+            aria-expanded={open}
+            className="grid size-10 place-items-center rounded-md hover:bg-muted"
+          >
+            <Menu className="size-5" />
+          </button>
+        </div>
       </div>
 
       {open && <div className="fixed inset-0 z-40 bg-black/40 lg:hidden" onClick={() => setOpen(false)} />}
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-border bg-card transition-transform lg:sticky lg:top-0 lg:h-screen lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 flex w-[min(18rem,calc(100vw-2rem))] flex-col border-r border-border bg-card transition-transform lg:sticky lg:top-0 lg:h-screen lg:w-64 lg:translate-x-0",
           open ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -64,7 +67,7 @@ export function AdminSidebar() {
           </button>
         </div>
 
-        <nav className="flex-1 space-y-1 p-3">
+        <nav className="flex-1 space-y-1 overflow-y-auto p-3">
           {nav.map((item) => {
             const active = item.exact
               ? pathname === item.href
@@ -75,7 +78,7 @@ export function AdminSidebar() {
                 href={item.href}
                 onClick={() => setOpen(false)}
                 className={cn(
-                  "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
+                  "flex min-h-11 items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
                   active
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -91,7 +94,8 @@ export function AdminSidebar() {
         <div className="border-t border-border p-3">
           <Link
             href="/dashboard"
-            className="group flex items-center gap-3 rounded-md px-3 py-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+            onClick={() => setOpen(false)}
+            className="group flex min-h-11 items-center gap-3 rounded-md px-3 py-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
           >
             <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-0.5" />
             Кабинет студента

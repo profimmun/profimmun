@@ -21,9 +21,9 @@ type CoursePoint = { name: string; count: number };
 
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-lg border border-border bg-card p-5 shadow-sm">
+    <div className="min-w-0 rounded-lg border border-border bg-card p-4 shadow-sm sm:p-5">
       <h3 className="mb-4 font-semibold">{title}</h3>
-      <div className="h-64">{children}</div>
+      <div className="h-64 overflow-x-auto">{children}</div>
     </div>
   );
 }
@@ -70,19 +70,21 @@ export function TopCoursesChart({ data }: { data: CoursePoint[] }) {
   }
   return (
     <ChartCard title="Топ курсов по записям">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} layout="vertical" margin={{ top: 5, right: 10, left: 10, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
-          <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} tickLine={false} axisLine={false} />
-          <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} tickLine={false} axisLine={false} />
-          <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "var(--muted)" }} />
-          <Bar dataKey="count" name="Записи" radius={[0, 6, 6, 0]} barSize={22}>
-            {data.map((_, i) => (
-              <Cell key={i} fill={BARS[i % BARS.length]} />
-            ))}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
+      <div className="h-full min-w-[320px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data} layout="vertical" margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
+            <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} tickLine={false} axisLine={false} />
+            <YAxis type="category" dataKey="name" width={110} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} tickLine={false} axisLine={false} />
+            <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "var(--muted)" }} />
+            <Bar dataKey="count" name="Записи" radius={[0, 6, 6, 0]} barSize={22}>
+              {data.map((_, i) => (
+                <Cell key={i} fill={BARS[i % BARS.length]} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
     </ChartCard>
   );
 }

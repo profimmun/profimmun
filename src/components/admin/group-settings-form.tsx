@@ -69,12 +69,12 @@ export function GroupSettingsForm({
         </div>
       </div>
 
-      <div className="flex items-center justify-between border-t border-border pt-4">
+      <div className="flex flex-col-reverse gap-2 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
         <Button
           type="button"
           variant="ghost"
           onClick={onDelete}
-          className="text-destructive hover:bg-destructive/10"
+          className="justify-center text-destructive hover:bg-destructive/10 sm:justify-start"
         >
           <Trash2 className="size-4" /> Удалить группу
         </Button>
