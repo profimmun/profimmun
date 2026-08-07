@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { ReviewBrowser, type ReviewItem } from "@/components/admin/review-browser";
 import { plural } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
+import { Download } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -69,13 +71,22 @@ export default async function ReviewsCoursesPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Проверка ответов</h1>
-        <p className="mt-1 text-muted-foreground">
-          {totalPending > 0
-            ? `${totalPending} ${plural(totalPending, ["работа ждёт", "работы ждут", "работ ждут"])} проверки. Выберите курс.`
-            : "Выберите курс, чтобы посмотреть ответы студентов."}
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-bold tracking-tight">Проверка ответов</h1>
+          <p className="mt-1 text-muted-foreground">
+            {totalPending > 0
+              ? `${totalPending} ${plural(totalPending, ["работа ждёт", "работы ждут", "работ ждут"])} проверки. Выберите курс.`
+              : "Выберите курс, чтобы посмотреть ответы студентов."}
+          </p>
+        </div>
+        <a
+          href="/api/admin/answers-export"
+          download
+          className={buttonVariants({ variant: "secondary", size: "sm" })}
+        >
+          <Download className="size-4" /> Выгрузить ответы
+        </a>
       </div>
 
       <ReviewBrowser

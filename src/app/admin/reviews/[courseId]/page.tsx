@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { ReviewBrowser, type ReviewItem } from "@/components/admin/review-browser";
 import { Breadcrumbs } from "@/components/admin/breadcrumbs";
 import { plural } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
+import { Download } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -82,9 +84,18 @@ export default async function ReviewsLessonsPage({
         ]}
       />
 
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">{course.title}</h1>
-        <p className="mt-1 text-muted-foreground">Выберите урок, чтобы посмотреть ответы</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-bold tracking-tight">{course.title}</h1>
+          <p className="mt-1 text-muted-foreground">Выберите урок, чтобы посмотреть ответы</p>
+        </div>
+        <a
+          href={`/api/admin/answers-export?courseId=${courseId}`}
+          download
+          className={buttonVariants({ variant: "secondary", size: "sm" })}
+        >
+          <Download className="size-4" /> Выгрузить ответы курса
+        </a>
       </div>
 
       <ReviewBrowser

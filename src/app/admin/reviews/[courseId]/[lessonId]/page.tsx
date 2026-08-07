@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Pencil } from "lucide-react";
+import { Download, Pencil } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import {
   AnswersReview,
@@ -124,12 +124,21 @@ export default async function ReviewsAnswersPage({
             {test && ` · ${test.title}`}
           </p>
         </div>
-        <Link
-          href={`/admin/courses/${courseId}/lessons/${lessonId}`}
-          className={buttonVariants({ variant: "secondary", size: "sm" })}
-        >
-          <Pencil className="size-4" /> Редактировать урок
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <a
+            href={`/api/admin/answers-export?lessonId=${lessonId}`}
+            download
+            className={buttonVariants({ variant: "secondary", size: "sm" })}
+          >
+            <Download className="size-4" /> Выгрузить ответы урока
+          </a>
+          <Link
+            href={`/admin/courses/${courseId}/lessons/${lessonId}`}
+            className={buttonVariants({ variant: "secondary", size: "sm" })}
+          >
+            <Pencil className="size-4" /> Редактировать урок
+          </Link>
+        </div>
       </div>
 
       <AnswersReview questions={withAnswers} />
