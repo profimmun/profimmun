@@ -378,3 +378,54 @@ export async function setUserRole(userId: string, role: "ADMIN" | "STUDENT") {
   await prisma.user.update({ where: { id: userId }, data: { role } });
   revalidatePath("/admin/students");
 }
+
+export async function deleteUserAccount(_prev: unknown, formData: FormData) {
+  const admin = await ensureAdmin();
+  const userId = String(formData.get("userId") ?? "");
+  const confirmEmail = String(formData.get("confirmEmail") ?? "").trim().toLowerCase();
+
+  if (!userId) return { error: "Пользователь не найден" };
+  if (admin.id === userId) {
+    return { error: "Нельзя удалить свой аккаунт из активной сессии" };
+  }
+
+  const target = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      email: true,
+      role: true,
+      _count: { select: { authoredCourses: true } },
+    },
+  });
+
+  if (!target) return { error: "Пользователь уже удалён" };
+  if (confirmEmail !== target.email.toLowerCase()) {
+    return { error: "Введите email пользователя для подтверждения удаления" };
+  }
+
+  if (target.role === "ADMIN") {
+    const admins = await prisma.user.count({ where: { role: "ADMIN" } });
+    if (admins <= 1) {
+      return { error: "Нельзя удалить последнего администратора платформы" };
+    }
+  }
+
+  await prisma.$transaction(async (tx) => {
+    if (target._count.authoredCourses > 0) {
+      await tx.course.updateMany({
+        where: { authorId: target.id },
+        data: { authorId: admin.id },
+      });
+    }
+
+    await tx.user.delete({ where: { id: target.id } });
+  });
+
+  revalidatePath("/admin/students");
+  revalidatePath("/admin/groups");
+  revalidatePath("/admin/courses");
+  revalidatePath("/admin");
+
+  return { success: "Пользователь удалён" };
+}
